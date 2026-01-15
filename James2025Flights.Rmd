@@ -1,0 +1,69 @@
+---
+title: "2025flights"
+output: html_document
+---
+````{r}
+library(tidyverse)
+library(dplyr)
+````
+
+````{r}
+dat <- read.csv("2025flightsFinal.csv")
+````
+
+````{r}
+grouped_airline <- dat |>
+  group_by(Airline) |>
+  summarize(Flights = n()) |>
+  arrange(desc(Flights))
+````
+
+````{r}
+grouped_origin <- dat |>
+  group_by(Origin) |>
+  summarize(Departures = n()) |>
+  arrange(desc(Departures))
+````
+
+````{r}
+grouped_dest <- dat |>
+  group_by(Destination) |>
+  summarize(Arrivals = n()) |>
+  arrange(desc(Arrivals))
+````
+
+````{r}
+names(grouped_origin)[names(grouped_origin) == "Origin"] <- "Airport"
+names(grouped_dest)[names(grouped_dest) == "Destination"] <- "Airport"
+
+dat2 <- merge(grouped_origin, grouped_dest, by = 'Airport', all = TRUE)
+
+dat2 <- dat2 |>
+  mutate(across(everything(), ~replace_na(., 0)),
+         TotalVisits = Departures + Arrivals) 
+
+dat2 <- dat2 |>
+  arrange(desc(TotalVisits))
+````
+
+````{r}
+dat <- dat |>
+  mutate(Segment = paste(Origin, Destination, sep = "-"))
+
+dat
+````
+
+````{r}
+dat |>
+  group_by(Segment) |>
+  summarise(count = n()) |>
+  arrange(desc(count))
+````
+
+````{r}
+dat2
+````
+
+````{r}
+grouped_airline
+````
